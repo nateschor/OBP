@@ -6,7 +6,7 @@ pacman::p_load(
   ggridges
 )
 
-df_lahman <- read_csv("data/lahman/derived/df_batting_lag5.csv") %>% 
+df_lahman <- read_csv(here("data/lahman/derived/df_batting_lag5.csv")) %>% 
   glimpse()
 
 
