@@ -9,10 +9,10 @@ pacman::p_load(
 )
 
 path_batting <- here("data/lahman/raw/batting.csv")
-path_master <- here("data/lahman/raw/master.csv")
+path_people <- here("data/lahman/raw/people.csv")
 
 write_csv(Batting, path_batting)
-write_csv(Master, path_master)
+write_csv(People, path_people)
 
 # https://www.smartfantasybaseball.com/tools/
 
@@ -51,7 +51,7 @@ df_batting <- read_csv(path_batting) %>%
 df_batting %>% 
   group_by(playerID, yearID, stint) # confirm that dataset is at the player-year-stint level 
 
-df_master <- read_csv(path_master) %>% 
+df_people <- read_csv(path_people) %>% 
   select(playerID, bbrefID, nameFirst, nameLast) %>% 
   glimpse()
 
@@ -65,7 +65,7 @@ df_batting_aggregated <- df_batting %>%
     across(G:GIDP, ~ sum(., na.rm = TRUE))
   ) %>% 
   ungroup() %>% 
-  left_join(df_master, by = "playerID") %>% 
+  left_join(df_people, by = "playerID") %>% 
   select(-playerID) %>% 
   glimpse()
 
