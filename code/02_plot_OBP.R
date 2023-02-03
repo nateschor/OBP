@@ -96,4 +96,25 @@ v_ridge_start_years <- c(2000, 2013, 2016)
 walk(v_ridge_start_years, ~ Plot_Ridges(., save = TRUE))
 
 
+df_ridge_plot <- df_lahman %>% 
+  filter(yearID %in% 2016:2020) %>% 
+  filter(between(cur_OBP, .001, .999)) %>% 
+  transmute(
+    bbrefID, 
+    yearID, 
+    OBP_per_PA = cur_OBP / cur_PA
+)
+
+p <- ggplot(df_ridge_plot, aes(x = OBP_per_PA, y = factor(yearID))) +
+  geom_density_ridges(fill = "#4477AA") +
+  scale_x_continuous(limits = c(0, .01), expand = expansion(0, .001)) +
+  scale_y_discrete(expand = expansion(0, 0)) +
+  labs(
+    x = "OBP per PA",
+    y = "Season"
+  ) +
+  theme_minimal()
+
+ggsave(plot = p, filename = here("report/figures/ridge_2016_2020_OBP_per_PA.png"))
+
 
