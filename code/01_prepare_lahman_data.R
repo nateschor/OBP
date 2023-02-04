@@ -85,7 +85,7 @@ df_batting_stats <- df_batting_aggregated %>%
   glimpse()
 
 df_tsibble <- as_tsibble(df_batting_stats, key = bbrefID, index = yearID) %>% 
-  fill_gaps() %>% # make missing seasons explicit instead of implicit so that previous row = last played seasion
+  fill_gaps() %>% # make missing seasons explicit instead of implicit so that previous row = last played season
   arrange(bbrefID, yearID) %>% 
   group_by(bbrefID)
 
@@ -114,7 +114,7 @@ df_combos <- expand_grid(
 
 tic()
 df_lags <- map2_dfc(df_combos$v_stats, df_combos$number_of_lags, function(x, y) {
-  print(x)
+  print(x) # Make sure code is running
   Grab_Lags(df_tsibble, x, y)
 }) 
 toc()
@@ -131,7 +131,7 @@ df_lags_cleaned %>%
 df_lags_cleaned %>% 
   group_by(bbrefID, yearID) # confirm at year-player level
 
-v_stats_to_rename <- names(df_batting_stats) == str_to_upper(names(df_batting_stats))
+v_stats_to_rename <- names(df_batting_stats) == str_to_upper(names(df_batting_stats)) # stats are in all caps, other variables are not all caps
 
 df_batting_stats_renamed <- df_batting_stats %>% 
   rename_with(., ~ paste0("cur_", .), c(-yearID, - bbrefID, -nameFirst, -nameLast)) # give all stats time horizon in name, easier to remove for testing
