@@ -16,7 +16,7 @@ df_fg <- read_csv(here("data/fangraphs/raw/obp.csv")) %>%
   ) %>% 
   glimpse() 
 
-df_crosswalk <- read_csv(here("data/sfbb_player_id_crosswalk.csv")) %>% 
+df_crosswalk <- read_csv(here("data/sfbb_player_id_crosswalk.csv")) %>% # "https://www.smartfantasybaseball.com/tools/"
   select(bbrefID = "BREFID", fgID = "IDFANGRAPHS", PLAYERNAME) %>% 
   glimpse()
 
@@ -117,6 +117,6 @@ df_fg_cleaned %>%
     delta_OBP = OBP - cur_OBP
   ) %>% 
   pull(delta_OBP) %>% 
-  hist()
+  qplot()
 
 

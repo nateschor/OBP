@@ -82,7 +82,7 @@ ggsave(plot = p, filename = here("report/figures/2019_2020_lag.png"))
 
 # Ridge Plots -------------------------------------------------------------
 
-median_2019 <- df_ridge_plot %>% 
+median_2019 <- df_lahman %>% 
   filter(yearID == 2019) %>% 
   pull(cur_OBP) %>% 
   median(., na.rm = TRUE)
@@ -119,7 +119,6 @@ Plot_Ridges <- function(start_year, save = FALSE) {
 v_ridge_start_years <- c(2000, 2013, 2016)
 
 walk(v_ridge_start_years, ~ Plot_Ridges(., save = TRUE))
-
 
 df_ridge_plot <- df_lahman %>% 
   filter(yearID %in% 2016:2020) %>% 
