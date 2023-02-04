@@ -11,12 +11,12 @@ df_training_raw <- read_csv(here("data/modeling/df_training.csv")) %>%
   glimpse()
 
 df_training <- df_training_raw %>% 
-  filter(yearID <= 2018) %>% 
+  filter(between(yearID, 1975, 2017)) %>% 
   select(contains("OBP")) %>% 
   print()
 
 df_validation <- df_training_raw %>% 
-  filter(yearID %in% 2019:2020) %>% 
+  filter(yearID %in% 2018:2020) %>% 
   select(contains("OBP")) %>% 
   print()
 
@@ -33,8 +33,6 @@ rmse_vec(
 ggplot(df_training_fitted, aes(x = cur_OBP, y = .resid)) +
   geom_point() +
   theme_minimal()
-
-predict(model_obp, df_validation)
 
 df_validation_fitted <- augment(x = model_obp, newdata = df_validation)
 
