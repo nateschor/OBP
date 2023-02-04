@@ -119,4 +119,19 @@ df_fg_cleaned %>%
   pull(delta_OBP) %>% 
   qplot()
 
+df_test <- left_join(df_fg_cleaned, df_lahman, by = c("bbrefID", "yearID")) %>% 
+  filter(yearID == 2021) %>% 
+  select(Name, fgID, bbrefID, yearID, OBP, PA, starts_with("lagged_")) %>% 
+  glimpse()
 
+write_csv(df_test, here("data/modeling/df_test.csv"))
+
+df_training <- df_lahman %>% 
+  filter(yearID < 2021) %>% 
+  mutate(
+    Name = paste(nameFirst, nameLast)
+  ) %>% 
+  select(Name, bbrefID, yearID, cur_OBP, starts_with("lagged_")) %>% 
+  glimpse()
+
+write_csv(df_training, here("data/modeling/df_training.csv"))
