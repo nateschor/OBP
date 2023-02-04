@@ -14,7 +14,7 @@ path_people <- here("data/lahman/raw/people.csv")
 write_csv(Batting, path_batting)
 write_csv(People, path_people)
 
-# https://www.smartfantasybaseball.com/tools/
+# FanGraphs ---------------------------------------------------------------
 
 df_fg <- read_csv(here("data/fangraphs/raw/obp.csv")) %>% 
   select(-birth_date) %>% 
@@ -44,6 +44,9 @@ df_fg_longer <- inner_join(df_fg_OBP_longer, df_fg_PA_longer, by = c("fgID", "ye
 df_fg_longer %>% 
   group_by(fgID, yearID) # confirm that dataset is now at the player-year level
 
+
+# Lahman ------------------------------------------------------------------
+
 df_batting <- read_csv(path_batting) %>% 
   select(playerID, yearID, stint, G:GIDP) %>% 
   glimpse()
@@ -55,7 +58,7 @@ df_people <- read_csv(path_people) %>%
   select(playerID, bbrefID, nameFirst, nameLast) %>% 
   glimpse()
 
-df_crosswalk <- read_csv(here("data/sfbb_player_id_crosswalk.csv")) %>% 
+df_crosswalk <- read_csv(here("data/sfbb_player_id_crosswalk.csv")) %>% # https://www.smartfantasybaseball.com/tools/
   select(bbrefID = "BREFID", fgID = "IDFANGRAPHS") %>% 
   glimpse()
 
@@ -82,7 +85,7 @@ df_batting_stats <- df_batting_aggregated %>%
   glimpse()
 
 df_tsibble <- as_tsibble(df_batting_stats, key = bbrefID, index = yearID) %>% 
-  fill_gaps() %>% 
+  fill_gaps() %>% # make missing seasons explicit instead of implicit so that previous row = last played seasion
   arrange(bbrefID, yearID) %>% 
   group_by(bbrefID)
 
@@ -94,8 +97,6 @@ Grab_Lags <- function(tsibble_df, stat, num_lags) {
       yearID,
       "lagged_{stat}_{num_lags}":= lag(.data[[stat]], n = num_lags)
     ) 
-  
-  
 }
 
 v_stats <- df_tsibble %>% 
@@ -109,7 +110,7 @@ df_combos <- expand_grid(
   number_of_lags = 1:5
 )
 
-# 2 minutes
+# 2.5 minutes
 
 tic()
 df_lags <- map2_dfc(df_combos$v_stats, df_combos$number_of_lags, function(x, y) {
@@ -133,26 +134,9 @@ df_lags_cleaned %>%
 v_stats_to_rename <- names(df_batting_stats) == str_to_upper(names(df_batting_stats))
 
 df_batting_stats_renamed <- df_batting_stats %>% 
-  rename_with(., ~ paste0("cur_", .), c(-yearID, - bbrefID, -nameFirst, -nameLast)) # give all stats time horizon in name
+  rename_with(., ~ paste0("cur_", .), c(-yearID, - bbrefID, -nameFirst, -nameLast)) # give all stats time horizon in name, easier to remove for testing
 
 df_lahman_merged <- left_join(df_lags_cleaned, df_batting_stats_renamed, by = c("bbrefID", "yearID")) %>% 
   glimpse()
 
 write_csv(df_lahman_merged, here("data/lahman/derived/df_batting_lag5.csv"))
-
-
-df_fg_longer <- df_fg %>% 
-  select(Name, birth_date, starts_with("OBP")) %>% 
-  pivot_longer(., starts_with("OBP"), names_to = "yearID", values_to = "OBP", names_prefix = "OBP_") %>% 
-  mutate(
-    yearID = 2000 + as.integer(yearID)
-  )
-
-left_join(df_all_lags, by = c("Name", "birth_date", "yearID"))
-
-v_21_players <- df_fg %>% 
-  pull("Name")
-
-df_all_lags %>% 
-  filter(Name %in% v_21_players) %>% 
-  distinct(playerID)
