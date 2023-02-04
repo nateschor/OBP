@@ -37,5 +37,9 @@ df_vars_selected_for_each_lambda <- tidy(mx_coefs) %>%
     selected_vars = list(variable)
   ) %>% 
   distinct(lambda_index, .keep_all = TRUE) %>% 
-  select(-variable)
+  select(-variable) # most important vars look to be OBP lags 1-3 and BB lags 1-3
+
+
+
+
 
