@@ -9,7 +9,6 @@ pacman::p_load(
 df_lahman <- read_csv(here("data/lahman/derived/df_batting_lag5.csv")) %>% 
   glimpse()
 
-
 # Lag Plots ---------------------------------------------------------------
 
 df_lag_plot <- df_lahman %>% 
@@ -22,7 +21,7 @@ df_lag_plot <- df_lahman %>%
 Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
   
   x_axis <- paste0("lagged_OBP_", num_lag)
-  x_axis_title <- paste0(num_lag, "-year Lag")
+  x_axis_title <- paste0(num_lag, "-year Lag of OBP")
   
   p <- ggplot(data = df_lag_plot, aes_string(x = x_axis, y = "cur_OBP")) +
     geom_point(alpha = .3, size = 1.5) +
@@ -32,7 +31,7 @@ Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
     scale_y_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
     labs(
       x = x_axis_title,
-      y = "Current Season"
+      y = "Current Season OBP"
     ) +
     theme_minimal() +
     theme(
