@@ -3,11 +3,46 @@ pacman::p_load(
   tidyverse,
   tidylog,
   here,
-  ggridges
+  ggridges,
+  ggthemes
 )
 
 df_lahman <- read_csv(here("data/lahman/derived/df_batting_lag5.csv")) %>% 
   glimpse()
+
+
+# Quartiles over time -----------------------------------------------------
+
+df_quartiles <- df_lahman %>% 
+  filter(yearID <= 2020) %>% 
+  filter(cur_OBP > 0) %>% 
+  group_by(yearID) %>% 
+  summarize(
+    `25th` = quantile(cur_OBP, probs = .25, na.rm = TRUE),
+    `50th` = quantile(cur_OBP, probs = .5, na.rm = TRUE),
+    `75th` = quantile(cur_OBP, probs = .75, na.rm = TRUE),
+  ) %>%  
+  pivot_longer(., cols = -yearID, names_to = "Quartile", values_to = "OBP") %>% 
+  mutate(
+    Quartile = factor(Quartile, levels = c("75th", "50th", "25th"))
+  )
+
+
+p_quartiles <- ggplot(df_quartiles, aes(x = yearID, y = OBP, color = Quartile)) +
+  geom_line(size = 1) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(breaks = seq(1870, 2020, 10)) +
+  scale_color_ptol() +
+  geom_vline(xintercept = 1973, linetype = "dashed") +
+  theme_minimal() +
+  labs(
+    x = "Season"
+  ) +
+  theme(
+    panel.grid = element_blank()
+  ) 
+
+ggsave(plot = p_quartiles, filename = here("report/figures/quartiles_ts.png"))
 
 # Lag Plots ---------------------------------------------------------------
 
@@ -140,5 +175,3 @@ p <- ggplot(df_ridge_plot, aes(x = OBP_per_PA, y = factor(yearID))) +
   theme_minimal()
 
 ggsave(plot = p, filename = here("report/figures/ridge_2016_2020_OBP_per_PA.png"))
-
-
