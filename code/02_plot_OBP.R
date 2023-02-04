@@ -55,6 +55,32 @@ v_lags <- 1:5
 walk(v_lags, ~ Plot_Lags(df_lag_plot, ., save = TRUE))
 
 
+# 2019 vs. 2020 to see if relationship persists ---------------------------
+
+df_2020 <- df_lahman %>% 
+  filter(yearID == 2020) %>% 
+  select(bbrefID, yearID, cur_OBP, lagged_OBP_1) %>% 
+  filter(
+    if_all(contains("OBP"), ~ between(., .001, .999))
+  )
+
+p <- ggplot(data = df_2020, aes(x = lagged_OBP_1, y = cur_OBP)) +
+  geom_point(alpha = .3, size = 1.5) +
+  geom_smooth(se = FALSE, color = "#4477AA", size = 1) +
+  geom_abline(slope = 1, linetype = "dashed", color = "#CC6677", size = 1) +
+  scale_x_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
+  scale_y_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
+  labs(
+    x = "2019 OBP",
+    y = "2020 OBP"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank()
+  )
+
+ggsave(plot = p, filename = here("report/figures/2019_2020_lag.png"))
+
 # Ridge Plots -------------------------------------------------------------
 
 median_2019 <- df_ridge_plot %>% 
