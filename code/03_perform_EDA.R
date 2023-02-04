@@ -9,7 +9,7 @@ pacman::p_load(
 
 
 df_lahman <- read_csv(here("data/lahman/derived/df_batting_lag5.csv")) %>% 
-  filter(between(yearID, 1995, 2020)) %>% 
+  filter(between(yearID, 1970, 2020)) %>% 
   glimpse()
 
 skim(df_lahman)
