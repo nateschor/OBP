@@ -140,7 +140,7 @@ df_training_1975_2019 <- df_lahman %>%
   mutate(
     Name = paste(nameFirst, nameLast)
   ) %>% 
-  select(Name, bbrefID, yearID, cur_OBP, starts_with("lagged_")) %>% 
+  select(Name, bbrefID, yearID, cur_OBP, cur_BB, starts_with("lagged_")) %>% 
   glimpse()
 
 df_training <- bind_rows(
