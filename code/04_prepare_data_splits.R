@@ -49,8 +49,7 @@ df_fg_crosswalk <- df_fg_longer %>%
 
 df_fg_crosswalk %>% 
   select(Name, PLAYERNAME, everything()) %>% 
-  distinct(Name, .keep_all = TRUE) %>% 
-  View(.) # confirm that for players with bbrefID they are merged correctly with fgID
+  distinct(Name, .keep_all = TRUE)  # confirm that for players with bbrefID they are merged correctly with fgID
 
 
 df_missing_bbrefid <- df_fg_longer %>% 
@@ -126,12 +125,30 @@ df_test <- left_join(df_fg_cleaned, df_lahman, by = c("bbrefID", "yearID")) %>%
 
 write_csv(df_test, here("data/modeling/df_test.csv"))
 
-df_training <- df_lahman %>% 
-  filter(yearID < 2021) %>% 
+df_training_2020 <- df_lahman %>% 
+  filter(yearID == 2020) %>% 
+  filter(cur_PA >= 30) %>% 
   mutate(
     Name = paste(nameFirst, nameLast)
   ) %>% 
   select(Name, bbrefID, yearID, cur_OBP, starts_with("lagged_")) %>% 
   glimpse()
+
+df_training_1975_2019 <- df_lahman %>% 
+  filter(between(yearID, 1975, 2019)) %>% 
+  filter(cur_PA >= 100) %>% 
+  mutate(
+    Name = paste(nameFirst, nameLast)
+  ) %>% 
+  select(Name, bbrefID, yearID, cur_OBP, starts_with("lagged_")) %>% 
+  glimpse()
+
+df_training <- bind_rows(
+  df_training_1975_2019,
+  df_training_2020
+)
+
+df_training %>% 
+  group_by(yearID, bbrefID)
 
 write_csv(df_training, here("data/modeling/df_training.csv"))

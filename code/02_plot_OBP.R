@@ -15,7 +15,7 @@ df_lahman <- read_csv(here("data/lahman/derived/df_batting_lag5.csv")) %>%
 
 df_quartiles_pre_2020 <- df_lahman %>% 
   filter(yearID <= 2019) %>% 
-  filter(cur_PA > 100) %>% 
+  filter(cur_PA >= 100) %>% 
   group_by(yearID) %>% 
   summarize(
     `25th` = quantile(cur_OBP, probs = .25, na.rm = TRUE),
@@ -29,7 +29,7 @@ df_quartiles_pre_2020 <- df_lahman %>%
 
 df_quartiles_2020 <- df_lahman %>% 
   filter(yearID == 2020) %>% 
-  filter(cur_PA > 30) %>% 
+  filter(cur_PA >= 30) %>% 
   group_by(yearID) %>% 
   summarize(
     `25th` = quantile(cur_OBP, probs = .25, na.rm = TRUE),
