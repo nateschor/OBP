@@ -28,7 +28,7 @@ df_validation <- df_training_raw %>%
   select(bbrefID, yearID, cur_OBP) %>%  
   left_join(., df_training, by = "bbrefID") %>% 
   mutate(
-    fitted_OBP = coalesce(fitted_OBP, median_obp_2013_2017) # for players with no obserations before 2019, replace with league median OBP 2013-2017
+    fitted_OBP = coalesce(fitted_OBP, median_obp_2013_2017) # for players with no obserations before 2018, replace with league median OBP 2013-2017
   ) %>% 
   print()
 
