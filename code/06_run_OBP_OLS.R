@@ -42,6 +42,16 @@ rmse_vec(
   na_rm = TRUE
 )
 
-ggplot(df_validation_fitted, aes(x = cur_OBP, y = .resid)) +
+p_resid <- ggplot(df_validation_fitted, aes(x = cur_OBP, y = .resid)) +
   geom_point() +
-  theme_minimal()
+  theme_minimal() +
+  labs(
+    x = "True OBP",
+    y = "OBP Residual"
+  ) +
+  theme(
+    panel.grid.minor = element_blank()
+  ) 
+
+ggsave(plot = p_resid, filename = here("report/figures/OLS_residuals.png"))
+  
