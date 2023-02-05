@@ -82,11 +82,6 @@ Fit_Splines <- function(predictor_list, dof) {
   
 }
 
-v_potential_predictors <- df_training %>% 
-  select(contains("BB"), contains("OBP")) %>% 
-  select(contains("lagged")) %>% 
-  names()
-
 v_spline_dof <- 2:10
 
 df_OBP_2 <- map_dfr(v_spline_dof, ~ Fit_Splines(c("lagged_OBP_1", "lagged_OBP_2"), .))
@@ -107,18 +102,21 @@ df_splines_models <- bind_rows(
     `Group ID` = cur_group_id() %>% as.factor() # https://stackoverflow.com/questions/39650511/r-group-by-variable-and-then-assign-a-unique-id
   )
   
-
-ggplot(df_splines_models, aes(x = `Spline DoF`, y = Validation, color = `Group ID`)) +
-  geom_line() +
-  geom_point() +
+ggplot(df_splines_models, aes(x = `Spline DoF`, y = `Validation RMSE`, color = `Group ID`)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
   scale_color_ptol() +
   scale_x_continuous(breaks = 2:10) +
   labs(
+    x = "Spline Degrees of Freedom",
     y = "Validation RMSE"
   ) +
   theme_minimal() +
   theme(
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    text = element_text(size = 14)
   )
 
+df_splines_models %>% 
+  filter(`Spline DoF` == 3, `Group ID` == 2)
 
