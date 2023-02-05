@@ -13,11 +13,13 @@ df_training_raw <- read_csv(here("data/modeling/df_training.csv")) %>%
 df_training <- df_training_raw %>% 
   filter(yearID <= 2017) %>% 
   select(contains("_")) %>% 
+  select(-cur_BB) %>% 
   glimpse()
   
 df_validation <- df_training_raw %>% 
   filter(yearID %in% 2018:2020) %>% 
   select(contains("_")) %>% 
+  select(-cur_BB) %>% 
   glimpse()
 
 model_lasso <- glmnet(cur_OBP ~ ., data = df_training, alpha = 1)  
