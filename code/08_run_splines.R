@@ -122,6 +122,3 @@ ggplot(df_splines_models, aes(x = `Spline DoF`, y = Validation, color = `Group I
   )
 
 
-# Test --------------------------------------------------------------------
-
-
