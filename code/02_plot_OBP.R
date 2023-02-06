@@ -64,12 +64,20 @@ ggsave(plot = p_quartiles, filename = here("report/figures/quartiles_ts.png"))
 
 # Lag Plots ---------------------------------------------------------------
 
-df_lag_plot <- df_lahman %>% 
-  filter(yearID %in% 2015:2020) %>% 
-  filter(
-    if_all(contains("OBP"), ~ between(., .2, .610))
-  ) %>% 
+df_lag_plot_pre_2020 <- df_lahman %>% 
+  filter(yearID %in% 1970:2019) %>% 
+  filter(cur_PA >= 100) %>% 
   select(bbrefID, yearID, contains("OBP"))
+
+df_lag_plot_2020 <- df_lahman %>% 
+  filter(yearID == 2020) %>% 
+  filter(cur_PA >= 30) %>% 
+  select(bbrefID, yearID, contains("OBP"))
+
+df_lag_plot <- bind_rows(
+  df_lag_plot_pre_2020,
+  df_lag_plot_2020
+)
 
 Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
   
@@ -80,7 +88,7 @@ Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
     geom_point(alpha = .3, size = 1.5) +
     geom_smooth(se = FALSE, color = "#4477AA", size = 1) +
     geom_abline(slope = 1, linetype = "dashed", color = "#CC6677", size = 1) +
-    scale_x_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
+    scale_x_continuous(limits = c(0, .7), expand = expansion(.05, 0)) +
     scale_y_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
     labs(
       x = x_axis_title,
@@ -98,6 +106,9 @@ Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
     
     ggsave(plot = p, filename = path_plot)
     
+  } else {
+    
+    return(p)
   }
   
 }
@@ -113,7 +124,7 @@ Plot_Ridges <- function(start_year, end_year, save = FALSE) {
   
   df_ridge_plot <- df_lahman %>% 
     filter(yearID %in% start_year:end_year) %>% 
-    filter(between(cur_OBP, .25, .610)) %>% 
+    filter(cur_PA > 30) %>% 
     select(bbrefID, yearID, cur_OBP)
   
   p <- ggplot(df_ridge_plot, aes(x = cur_OBP, y = factor(yearID))) +
@@ -147,7 +158,7 @@ walk2(v_ridge_start_years, v_ridge_end_years, ~ Plot_Ridges(.x, .y, save = TRUE)
 
 df_ridge_plot <- df_lahman %>% 
   filter(yearID %in% 2016:2020) %>% 
-  filter(between(cur_OBP, .001, .999)) %>% 
+  filter(cur_PA >= 30) %>% 
   transmute(
     bbrefID, 
     yearID, 
