@@ -2,7 +2,7 @@
 
 ## Goal: Predict OBP with the smallest RMSE possible for 2021 season
 
-To run: Run the scripts 01_* through 09_* in order. If you do not have the `pacman` package you will need to install it, and then `pacman` will handle installing any additional packages not installed 
+To run: In `code/`, run the scripts 01_* through 09_* in order. If you do not have the `pacman` package you will need to install it, and then `pacman` will handle installing any additional packages you do not have installed 
 
 Additional packages used:
 * [broom](https://cran.r-project.org/web/packages/broom/vignettes/broom.html)
