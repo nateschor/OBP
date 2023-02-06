@@ -32,7 +32,7 @@ df_validation <- df_training_raw %>%
   ) %>% 
   print()
 
-rmse_vec(
+rmse_vec( # https://yardstick.tidymodels.org/reference/rmse.html
   truth = df_validation$cur_OBP,
   estimate = df_validation$fitted_OBP
 )

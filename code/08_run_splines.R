@@ -48,7 +48,7 @@ Fit_Splines <- function(predictor_list, dof) {
   splines_recipe <- recipe(cur_OBP ~ ., data = df_training) %>% 
     update_role(bbrefID, yearID, new_role = "id") %>% 
     step_intercept() %>% 
-    step_ns(predictor_list, deg_free = dof) %>% 
+    step_ns(predictor_list, deg_free = dof) %>% # https://recipes.tidymodels.org/reference/step_ns.html
     prep(., strings_as_factors = FALSE)
   
   df_training_baked <- bake(splines_recipe, df_training) %>% 

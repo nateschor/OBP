@@ -22,7 +22,7 @@ df_validation <- df_training_raw %>%
   select(-cur_BB) %>% 
   glimpse()
 
-model_lasso <- glmnet(cur_OBP ~ ., data = df_training, alpha = 1)  
+model_lasso <- glmnet(cur_OBP ~ ., data = df_training, alpha = 1) # alpha == 1 is LASSO, 0 is Ridge https://cran.r-project.org/web/packages/glmnetUtils/vignettes/intro.html 
 
 mx_coefs <- coef(model_lasso)
 

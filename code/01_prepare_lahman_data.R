@@ -80,7 +80,7 @@ df_batting_stats <- df_batting_aggregated %>%
   ) %>% 
   glimpse()
 
-df_tsibble <- as_tsibble(df_batting_stats, key = bbrefID, index = yearID) %>% 
+df_tsibble <- as_tsibble(df_batting_stats, key = bbrefID, index = yearID) %>% # https://tsibble.tidyverts.org/
   fill_gaps() %>% # make missing seasons explicit instead of implicit so that previous row = last played season
   arrange(bbrefID, yearID) %>% 
   group_by(bbrefID)
