@@ -11,8 +11,8 @@ pacman::p_load(
 path_batting <- here("data/lahman/raw/batting.csv")
 path_people <- here("data/lahman/raw/people.csv")
 
-write_csv(Batting, path_batting)
-write_csv(People, path_people)
+write_csv(Lahman::Batting, path_batting)
+write_csv(Lahman::People, path_people)
 
 # FanGraphs ---------------------------------------------------------------
 
@@ -47,19 +47,15 @@ df_fg_longer %>%
 
 # Lahman ------------------------------------------------------------------
 
-df_batting <- read_csv(path_batting) %>% 
+df_batting <- Lahman::Batting %>% 
   select(playerID, yearID, stint, G:GIDP) %>% 
   glimpse()
 
 df_batting %>% 
   group_by(playerID, yearID, stint) # confirm that dataset is at the player-year-stint level 
 
-df_people <- read_csv(path_people) %>% 
+df_people <- Lahman::People %>% 
   select(playerID, bbrefID, nameFirst, nameLast) %>% 
-  glimpse()
-
-df_crosswalk <- read_csv(here("data/sfbb_player_id_crosswalk.csv")) %>% # https://www.smartfantasybaseball.com/tools/
-  select(bbrefID = "BREFID", fgID = "IDFANGRAPHS") %>% 
   glimpse()
 
 df_batting_aggregated <- df_batting %>% 
@@ -84,7 +80,7 @@ df_batting_stats <- df_batting_aggregated %>%
   ) %>% 
   glimpse()
 
-df_tsibble <- as_tsibble(df_batting_stats, key = bbrefID, index = yearID) %>% 
+df_tsibble <- as_tsibble(df_batting_stats, key = bbrefID, index = yearID) %>% # https://tsibble.tidyverts.org/
   fill_gaps() %>% # make missing seasons explicit instead of implicit so that previous row = last played season
   arrange(bbrefID, yearID) %>% 
   group_by(bbrefID)

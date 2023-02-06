@@ -3,20 +3,81 @@ pacman::p_load(
   tidyverse,
   tidylog,
   here,
-  ggridges
+  ggridges,
+  ggthemes
 )
 
 df_lahman <- read_csv(here("data/lahman/derived/df_batting_lag5.csv")) %>% 
   glimpse()
 
+
+# Quartiles over time -----------------------------------------------------
+
+df_quartiles_pre_2020 <- df_lahman %>% 
+  filter(yearID <= 2019) %>% 
+  filter(cur_PA >= 100) %>% 
+  group_by(yearID) %>% 
+  summarize(
+    `25th` = quantile(cur_OBP, probs = .25, na.rm = TRUE),
+    `50th` = quantile(cur_OBP, probs = .5, na.rm = TRUE),
+    `75th` = quantile(cur_OBP, probs = .75, na.rm = TRUE),
+  ) %>%  
+  pivot_longer(., cols = -yearID, names_to = "Quartile", values_to = "OBP") %>% 
+  mutate(
+    Quartile = factor(Quartile, levels = c("75th", "50th", "25th"))
+  )
+
+df_quartiles_2020 <- df_lahman %>% 
+  filter(yearID == 2020) %>% 
+  filter(cur_PA >= 30) %>% 
+  group_by(yearID) %>% 
+  summarize(
+    `25th` = quantile(cur_OBP, probs = .25, na.rm = TRUE),
+    `50th` = quantile(cur_OBP, probs = .5, na.rm = TRUE),
+    `75th` = quantile(cur_OBP, probs = .75, na.rm = TRUE),
+  ) %>%  
+  pivot_longer(., cols = -yearID, names_to = "Quartile", values_to = "OBP") %>% 
+  mutate(
+    Quartile = factor(Quartile, levels = c("75th", "50th", "25th"))
+  )
+
+df_quartiles <- bind_rows(
+  df_quartiles_pre_2020,
+  df_quartiles_2020
+)
+
+p_quartiles <- ggplot(df_quartiles, aes(x = yearID, y = OBP, color = Quartile)) +
+  geom_line(size = 1) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(breaks = seq(1870, 2020, 10)) +
+  scale_color_ptol() +
+  geom_vline(xintercept = 1970, linetype = "dashed") +
+  theme_minimal() +
+  labs(
+    x = "Season"
+  ) +
+  theme(
+    panel.grid = element_blank()
+  ) 
+
+ggsave(plot = p_quartiles, filename = here("report/figures/quartiles_ts.png"))
+
 # Lag Plots ---------------------------------------------------------------
 
-df_lag_plot <- df_lahman %>% 
-  filter(yearID %in% 2015:2020) %>% 
-  filter(
-    if_all(contains("OBP"), ~ between(., .001, .999))
-  ) %>% 
+df_lag_plot_pre_2020 <- df_lahman %>% 
+  filter(yearID %in% 1970:2019) %>% 
+  filter(cur_PA >= 100) %>% 
   select(bbrefID, yearID, contains("OBP"))
+
+df_lag_plot_2020 <- df_lahman %>% 
+  filter(yearID == 2020) %>% 
+  filter(cur_PA >= 30) %>% 
+  select(bbrefID, yearID, contains("OBP"))
+
+df_lag_plot <- bind_rows(
+  df_lag_plot_pre_2020,
+  df_lag_plot_2020
+)
 
 Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
   
@@ -27,7 +88,7 @@ Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
     geom_point(alpha = .3, size = 1.5) +
     geom_smooth(se = FALSE, color = "#4477AA", size = 1) +
     geom_abline(slope = 1, linetype = "dashed", color = "#CC6677", size = 1) +
-    scale_x_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
+    scale_x_continuous(limits = c(0, .7), expand = expansion(.05, 0)) +
     scale_y_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
     labs(
       x = x_axis_title,
@@ -45,6 +106,9 @@ Plot_Lags <- function(plotting_data, num_lag, save = FALSE) {
     
     ggsave(plot = p, filename = path_plot)
     
+  } else {
+    
+    return(p)
   }
   
 }
@@ -54,76 +118,47 @@ v_lags <- 1:5
 walk(v_lags, ~ Plot_Lags(df_lag_plot, ., save = TRUE))
 
 
-# 2019 vs. 2020 to see if relationship persists ---------------------------
-
-df_2020 <- df_lahman %>% 
-  filter(yearID == 2020) %>% 
-  select(bbrefID, yearID, cur_OBP, lagged_OBP_1) %>% 
-  filter(
-    if_all(contains("OBP"), ~ between(., .001, .999))
-  )
-
-p <- ggplot(data = df_2020, aes(x = lagged_OBP_1, y = cur_OBP)) +
-  geom_point(alpha = .3, size = 1.5) +
-  geom_smooth(se = FALSE, color = "#4477AA", size = 1) +
-  geom_abline(slope = 1, linetype = "dashed", color = "#CC6677", size = 1) +
-  scale_x_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
-  scale_y_continuous(limits = c(0, .7), expand = expansion(0, 0)) +
-  labs(
-    x = "2019 OBP",
-    y = "2020 OBP"
-  ) +
-  theme_minimal() +
-  theme(
-    panel.grid.minor = element_blank()
-  )
-
-ggsave(plot = p, filename = here("report/figures/2019_2020_lag.png"))
-
 # Ridge Plots -------------------------------------------------------------
 
-median_2019 <- df_ridge_plot %>% 
-  filter(yearID == 2019) %>% 
-  pull(cur_OBP) %>% 
-  median(., na.rm = TRUE)
-
-Plot_Ridges <- function(start_year, save = FALSE) {
+Plot_Ridges <- function(start_year, end_year, save = FALSE) {
   
   df_ridge_plot <- df_lahman %>% 
-    filter(yearID %in% start_year:2020) %>% 
-    filter(between(cur_OBP, .001, .999)) %>% 
+    filter(yearID %in% start_year:end_year) %>% 
+    filter(cur_PA > 30) %>% 
     select(bbrefID, yearID, cur_OBP)
   
   p <- ggplot(df_ridge_plot, aes(x = cur_OBP, y = factor(yearID))) +
     geom_density_ridges(fill = "#4477AA") +
-    scale_x_continuous(expand = expansion(0, 0)) +
+    scale_x_continuous(expand = expansion(0, 0), breaks = c(0, .2, .4, .6)) +
     scale_y_discrete(expand = expansion(0, 0)) +
     labs(
       x = "OBP",
       y = "Season"
     ) +
-    geom_vline(xintercept = median_2019, linetype = "dashed", color = "#CC6677", size = 1) +
     theme_minimal()
   
   if(save == TRUE) {
     
-    file_name <- paste0("ridge_", start_year, "_2020.png")
+    file_name <- paste0("ridge_", start_year, "_", end_year, ".png")
     path_plot <- here("report/figures/", file_name)
     
     ggsave(plot = p, filename = path_plot)
     
+  } else{
+    
+    return(p)
   }
   
 }
 
-v_ridge_start_years <- c(2000, 2013, 2016)
+v_ridge_start_years <- c(1970, 2000)
+v_ridge_end_years <- c(1999, 2020)
 
-walk(v_ridge_start_years, ~ Plot_Ridges(., save = TRUE))
-
+walk2(v_ridge_start_years, v_ridge_end_years, ~ Plot_Ridges(.x, .y, save = TRUE))
 
 df_ridge_plot <- df_lahman %>% 
   filter(yearID %in% 2016:2020) %>% 
-  filter(between(cur_OBP, .001, .999)) %>% 
+  filter(cur_PA >= 30) %>% 
   transmute(
     bbrefID, 
     yearID, 
@@ -141,5 +176,3 @@ p <- ggplot(df_ridge_plot, aes(x = OBP_per_PA, y = factor(yearID))) +
   theme_minimal()
 
 ggsave(plot = p, filename = here("report/figures/ridge_2016_2020_OBP_per_PA.png"))
-
-
