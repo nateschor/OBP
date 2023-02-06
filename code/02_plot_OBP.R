@@ -109,10 +109,10 @@ walk(v_lags, ~ Plot_Lags(df_lag_plot, ., save = TRUE))
 
 # Ridge Plots -------------------------------------------------------------
 
-Plot_Ridges <- function(start_year, save = FALSE) {
+Plot_Ridges <- function(start_year, end_year, save = FALSE) {
   
   df_ridge_plot <- df_lahman %>% 
-    filter(yearID %in% start_year:2020) %>% 
+    filter(yearID %in% start_year:end_year) %>% 
     filter(between(cur_OBP, .25, .610)) %>% 
     select(bbrefID, yearID, cur_OBP)
   
@@ -128,18 +128,22 @@ Plot_Ridges <- function(start_year, save = FALSE) {
   
   if(save == TRUE) {
     
-    file_name <- paste0("ridge_", start_year, "_2020.png")
+    file_name <- paste0("ridge_", start_year, "_", end_year, ".png")
     path_plot <- here("report/figures/", file_name)
     
     ggsave(plot = p, filename = path_plot)
     
+  } else{
+    
+    return(p)
   }
   
 }
 
-v_ridge_start_years <- c(2000, 2013, 2016)
+v_ridge_start_years <- c(1970, 2000)
+v_ridge_end_years <- c(1999, 2020)
 
-walk(v_ridge_start_years, ~ Plot_Ridges(., save = TRUE))
+walk2(v_ridge_start_years, v_ridge_end_years, ~ Plot_Ridges(.x, .y, save = TRUE))
 
 df_ridge_plot <- df_lahman %>% 
   filter(yearID %in% 2016:2020) %>% 
