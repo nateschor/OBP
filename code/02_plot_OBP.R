@@ -129,7 +129,7 @@ Plot_Ridges <- function(start_year, end_year, save = FALSE) {
   
   p <- ggplot(df_ridge_plot, aes(x = cur_OBP, y = factor(yearID))) +
     geom_density_ridges(fill = "#4477AA") +
-    scale_x_continuous(expand = expansion(0, 0)) +
+    scale_x_continuous(expand = expansion(0, 0), breaks = c(0, .2, .4, .6)) +
     scale_y_discrete(expand = expansion(0, 0)) +
     labs(
       x = "OBP",
