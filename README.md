@@ -12,6 +12,7 @@ Additional packages used:
 * [glmnetUtils](https://cran.r-project.org/web/packages/glmnetUtils/vignettes/intro.html)
 * [here](https://cran.r-project.org/web/packages/here/vignettes/here.html)
 * [Lahman](https://cran.r-project.org/web/packages/Lahman/Lahman.pdf)
+* [pacman](https://cran.r-project.org/web/packages/pacman/readme/README.html)
 * [skimr](https://cran.r-project.org/web/packages/skimr/vignettes/skimr.html)
 * [tictoc](https://cran.r-project.org/package=tictoc)
 * [tidylog](https://cran.r-project.org/web/packages/tidylog/readme/README.html)
